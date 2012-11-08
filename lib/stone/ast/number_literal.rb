@@ -7,8 +7,28 @@ module Stone
         super(token)
       end
 
+      def value
+        token.get_number
+      end
+    end
+
+    class IdentifierLiteral < AstLeaf
+      def initialize(token)
+        super(token)
+      end
+
       def name
-        self.token.get_text
+        token.get_text
+      end
+    end
+
+    class StringLiteral < AstLeaf
+      def initialize(token)
+        super(token)
+      end
+
+      def name
+        token.get_text
       end
     end
   end
