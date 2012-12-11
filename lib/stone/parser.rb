@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 module Stone
-  class ExprParser
+  class Parser
     class Precedence
       attr :value, :left_assoc
       def initialize(v, a)
@@ -40,9 +40,9 @@ module Stone
     end
 
     def next_operator
-      token = @lexer.peek(0)
-      if token.is_identifier?
-        @operators[token.get_text]
+      t = @lexer.peek(0)
+      if t.is_identifier?
+        @operators[t.get_text]
       else
         nil
       end
@@ -56,24 +56,85 @@ module Stone
       end
     end
 
+    def param
+      t = @lexer.read
+      if t.is_identifier?
+        Ast::IdentifierLiteral.new(t)
+      else
+        raise "Parser Exception in param"
+      end
+    end
+
+    def params
+      list = []
+      list << param
+      while is_token?(",")
+        token(",")
+        list << param
+      end
+      Ast::AstList.new(list)
+    end
+
+    def param_list
+      raise "Parser Error in param_list" unless is_token?("(")
+      token("(")
+      list = params
+      token(")")
+      list
+    end
+
+    def function
+      list = []
+      token("def")
+      t = @lexer.read
+      if t.is_identifier?
+        Ast::AstList.new([Ast::IdentifierLiteral.new(t), param_list, block])
+      else
+        raise "Parse Error in def"
+      end
+    end
+
+    def args
+      list = []
+      list << expr
+      while is_token?(",")
+        token(",")
+        list << expr
+      end
+      Ast::AstList.new(list)
+    end
+
+    def postfix
+      raise "Parse Error in postfix" unless is_token?("(")
+      token("(")
+      result = args unless is_token?(")")
+      token(")")
+      result
+    end
+
     def primary
+      list = []
       if is_token?("(")
         token("(")
         e = expr
         token(")")
-        return e
+        list << e
       else
-        token = @lexer.read
-        if token.is_number?
-          Ast::NumberLiteral.new(token)
-        elsif token.is_identifier?
-          Ast::IdentifierLiteral.new(token)
-        elsif token.is_string?
-          Ast::StringLiteral.new(token)
+        t = @lexer.read
+        if t.is_number?
+          list << Ast::NumberLiteral.new(t)
+        elsif t.is_identifier?
+          list << Ast::IdentifierLiteral.new(t)
+        elsif t.is_string?
+          list << Ast::StringLiteral.new(t)
         else
           raise "Parse Exception in primary"
         end
       end
+      while is_token?("(")
+        list << postfix
+      end
+      Ast::AstList.new(list)
     end
 
     def factor
@@ -90,12 +151,6 @@ module Stone
         right = do_shift(right, n.value)
       end
       right
-
-      #left = factor
-      #while is_token?("+") || is_token?("-") || is_token?("=") || is_token?("==")
-      #  left = Ast::BinaryExpr.new([left, Ast::AstLeaf.new(@lexer.read), factor])
-      #end
-      #left
     end
 
     def block
@@ -112,7 +167,12 @@ module Stone
     end
 
     def simple
-      expr
+      list = []
+      list << expr
+      if is_token?("-") || is_token?("(")
+        list << args
+      end
+      Ast::AstList.new(list)
     end
 
     def statement
@@ -140,25 +200,32 @@ module Stone
     end
 
     def parse
-      s = statement unless is_eol?
+      result = Stone::Token.EOL
+      unless is_eol?
+        if is_token?("def")
+          result = function
+        else
+          result = statement
+        end
+      end
       if is_eol?
         @lexer.read
       else
         raise "Parse Exception in parse"
       end
-      s
+      return result
     end
 
     def token(name)
-      token = @lexer.read
-      unless token.is_identifier? && name == token.get_text
+      t = @lexer.read
+      unless t.is_identifier? && name == t.get_text
         raise "Parse Exception"
       end
     end
 
     def is_token?(name)
-      token = @lexer.peek(0)
-      token.is_identifier? && name == token.get_text
+      t = @lexer.peek(0)
+      t.is_identifier? && name == t.get_text
     end
 
     def is_eol?

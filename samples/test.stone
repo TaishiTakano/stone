@@ -1,1 +1,13 @@
+<<<<<<< HEAD
 55 + 16 - 45 * 10
+=======
+def test(a) {
+		a = a + 1
+		while(a) {
+	      test(a - 1)
+		}
+}
+
+b = test(1)
+a = b + 1
+>>>>>>> 11d1eb70a11d35ec66a9ffeaf510db89c948a346

@@ -13,10 +13,6 @@ module Stone
         @children[i]
       end
 
-      def num_children
-        @children.size
-      end
-
       def to_s
         result = "("
         sep = ""
@@ -25,6 +21,10 @@ module Stone
           sep = " "
         end
         result = result + ")"
+      end
+
+      def num_children
+        @children.size
       end
 
       def location
