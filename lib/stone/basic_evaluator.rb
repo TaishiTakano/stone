@@ -155,6 +155,12 @@ module Stone
         end
       end
     end
+
+    class IdentifierLiteral
+      def eval(env)
+        
+      end
+    end
  
   end
 end
