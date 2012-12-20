@@ -88,7 +88,7 @@ module Stone
       token("def")
       t = @lexer.read
       if t.is_identifier?
-        Ast::AstList.new([Ast::IdentifierLiteral.new(t), param_list, block])
+        Ast::DefStmnt.new([Ast::IdentifierLiteral.new(t), param_list, block])
       else
         raise "Parse Error in def"
       end
@@ -233,6 +233,18 @@ module Stone
 
     def is_eol?
       is_token?(";") || is_token?("\n")
+    end
+
+    def parse_array
+      result = nil
+      if is_token("[")
+        result = array
+      else
+        result = statement
+      end
+    end
+
+    def array
     end
   end
 end
