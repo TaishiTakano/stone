@@ -266,24 +266,5 @@ module Stone
     def is_eol?
       is_token?(";") || is_token?("\n")
     end
-
-<<<<<<< HEAD
-    def parse_array
-      result = nil
-      if is_token("[")
-        result = array
-      else
-        result = statement
-      end
-    end
-
-    def array
-    end
-=======
-    def is_eof?
-      @lexer.peek(0) == Stone::Token.EOF
-    end
-
->>>>>>> 96bbb2d706850414d4c9056b193e4862c4a4d443
   end
 end
