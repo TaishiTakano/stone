@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+
 module Stone
   module Ast
-    TRUE = 1
+    TRUE  = 1
     FALSE = 0
 
     class AstTree
@@ -47,7 +48,7 @@ module Stone
       def eval(env)
         value = operand().eval(env)
         if value.kind_of?(Integer)
-          value * (-1)
+          -value
         else
           # 例外処理
         end
@@ -87,12 +88,11 @@ module Stone
           # 右辺か左辺が変数だった時？
         end
       end
-      
-      
+
       def compute_number(left, op, right)
         a = left
         b = right
-        
+
         case op
           when "+" then return a + b
           when "-" then return a - b
@@ -123,7 +123,7 @@ module Stone
         result
       end
     end
-    
+
     class IfStmnt
       def eval(env)
         condition = self.condition().eval(env)
@@ -140,7 +140,7 @@ module Stone
         end
       end
     end
-    
+
     class WhileStmnt
       def eval(env)
         result = 0
@@ -156,11 +156,75 @@ module Stone
       end
     end
 
-    class IdentifierLiteral
+    class DefStmnt
       def eval(env)
-        
+        f = Stone::Function.new(parameters, body, env)
+        env.put(name, f)
+        name
       end
     end
- 
+
+    class PrimaryExpr
+      def operand
+        self.child(0)
+      end
+      
+      def postfix(nest)
+        child(self.num_children - nest - 1)
+      end
+      
+      def has_postfix(nest)
+        self.num_children - nest > 1
+      end
+      
+      def eval(env)
+        eval_sub_expr(env, 0)
+      end
+      
+      def eval_sub_expr(env, nest)
+        if has_postfix(nest)
+          target = eval_sub_expr(env, nest + 1)
+          postfix(nest).eval(env, target)
+        else
+          operand.eval(env)
+        end
+      end
+    end
+    
+    class Postfix
+      def eval(env, value)
+      end
+    end
+
+    class Arguments
+      def eval(caller_env, value)
+        unless value.kind_of?(Function)
+          # 例外投げるぽいよ
+        end
+        
+        func = value
+        params = func.parameters
+        
+        unless self.size == params.size
+          # ここも例外投げるぽいよ
+        end
+        
+        new_env = func.make_env
+        num = 0
+
+        self.children.each do |tree|
+          params.eval(new_env, num, tree.eval(caller_env))
+          num += 1
+        end
+        
+        func.body.eval(new_env)
+      end
+    end
+
+    class ParameterList
+      def eval(env, index, value)
+        env.put(name(index), value)
+      end
+    end
   end
 end

@@ -2,10 +2,10 @@
 55 + 16 - 45 * 10
 =======
 def test(a) {
-		a = a + 1
-		while(a) {
-	      test(a - 1)
-		}
+  while(a < 10) {
+    a = a + 1
+  }
+  a
 }
 
 b = test(1)

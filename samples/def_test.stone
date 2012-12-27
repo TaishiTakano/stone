@@ -8,3 +8,7 @@ def fact (n) {
 }
 
 fact(3)
+<<<<<<< HEAD
+=======
+
+>>>>>>> 87569e14fa1909d86a1beb8c73f941e4a6eafdf8
